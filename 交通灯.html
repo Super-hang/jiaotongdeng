@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交通灯</title>
+</head>
+<style>
+    #idRed {
+        /* background-color: red; */
+        width: 150px;
+        height: 150px;
+        margin: 10px;
+        border: 1px solid black;
+        display: inline-block;
+        border-radius: 50%;
+    }
+
+    #idYellow {
+        /* background-color: yellow; */
+        width: 150px;
+        height: 150px;
+        margin: 10px;
+        border: 1px solid black;
+        display: inline-block;
+        border-radius: 50%;
+    }
+
+    #idGreen {
+        /* background-color: green; */
+        width: 150px;
+        height: 150px;
+        margin: 10px;
+        border: 1px solid black;
+        display: inline-block;
+        border-radius: 50%;
+    }
+</style>
+
+<body>
+    <div class="d_f fd_c ai_c">
+        <div class="w_268 d_f jc_sb ai_c">
+            <div id="idRed" class="w_68 h_68 radius_50_ bc_rgba_68_68_86_05"></div>
+            <div id="idYellow" class="w_68 h_68 radius_50_ bc_rgba_68_68_86_05"></div>
+            <div id="idGreen" class="w_68 h_68 radius_50_ bc_rgba_68_68_86_05"></div>
+        </div>
+
+        <div id="idTime" class="mt_10 fs_30 fw_700">0</div>
+
+        <div class="mt_10 w_168 d_f jc_sb">
+            <button class="c_p" onclick="handleStart()">开始</button>
+            <button class="c_p" onclick="handleCease()">停止</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // import { TrafficLight } from './index.js';
+        export class TrafficLight {
+            constructor(options) {
+                const {
+                    red = 60,
+                    green = 60,
+                    yellow = 3,
+                    initial = 'green'
+                } = options;
+
+                this._colors = {
+                    red: {
+                        seconds: red,
+                        next: 'yellow',
+                        color: '#ff0000'
+                    },
+                    green: {
+                        seconds: green,
+                        next: 'yellow',
+                        color: '#008000'
+                    },
+                    yellow: {
+                        seconds: yellow,
+                        color: '#ffff00'
+                    }
+                };
+
+                this._switch(initial);
+            }
+
+            _switch(color) {
+                this._currentColor = color;
+                this._seconds = this._colors[color].seconds;
+                this._time = Date.now();
+            }
+            _next() {
+                if (this._currentColor === 'red') {
+                    this._colors.yellow.next = 'green';
+                } else if (this._currentColor === 'green') {
+                    this._colors.yellow.next = 'red';
+                }
+
+                this._switch(this._colors[this._currentColor].next);
+            }
+            getCurrentLight() {
+                // const remain = Math.floor(this._seconds - (Date.now() - this._time) / 1000);
+                const remain = Math.ceil(this._seconds - (Date.now() - this._time) / 1000);
+                // console.log(remain,'remainremain')
+                if (remain <= 0) {
+                    this._next();
+                }
+
+                return {
+                    color: this._currentColor,
+                    HColor: this._colors[this._currentColor],
+                    remain
+                };
+            }
+        }
+
+
+        let idTime = document.querySelector('#idTime'),
+            idRed = document.querySelector('#idRed'),
+            idYellow = document.querySelector('#idYellow'),
+            idGreen = document.querySelector('#idGreen'),
+            light = undefined
+        // current = undefined;
+
+        function raf() {
+            window.animation = requestAnimationFrame(() => {
+                raf();
+                const current = light.getCurrentLight();
+
+                idRed.style.backgroundColor = current.color === 'red' ? current.HColor.color : '';
+                idYellow.style.backgroundColor = current.color === 'yellow' ? current.HColor.color : '';
+                idGreen.style.backgroundColor = current.color === 'green' ? current.HColor.color : '';
+
+                idTime.textContent = current.remain;
+            });
+        }
+
+        window.handleStart = function () {
+            light = new TrafficLight({
+                red: 5,
+                yellow: 3,
+                green: 10,
+                initial: 'red'
+            });
+            // current = light.getCurrentLight();
+
+            raf();
+        }
+
+        window.handleCease = function () {
+            cancelAnimationFrame(window.animation);
+
+            window.animation = undefined;
+        }
+    </script>
+
+</body>
+
+</html>
